@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10213d">
+  <meta name="description" content="A simple level and item calculator.">
+  <title>Level Finder</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    :root { color-scheme: dark; --bg:#0b1424; --panel:#14233a; --panel2:#1b2d49; --line:#2c4262; --text:#f4f7fc; --muted:#a9b8ce; --accent:#70d6a5; --gold:#ffd166; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at top,#1a3152 0%,var(--bg) 58%); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding: max(18px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom)); }
+    .app { width:min(100%,560px); margin:0 auto; }
+    header { text-align:center; padding:14px 8px 22px; }
+    .logo { width:54px;height:54px;border-radius:17px;display:grid;place-items:center;margin:0 auto 12px;background:linear-gradient(145deg,#75e0b0,#278a78);color:#09251f;font-size:27px;font-weight:900;box-shadow:0 8px 25px #0005; }
+    h1 { margin:0;font-size:27px;letter-spacing:1.6px; }
+    .sub { color:var(--muted);font-size:12px;letter-spacing:2px;margin-top:5px; }
+    .card { background:linear-gradient(160deg,#172943,#122038); border:1px solid var(--line); border-radius:20px; padding:18px; margin-bottom:15px; box-shadow:0 12px 30px #0003; }
+    .section-title { color:var(--muted);font-size:11px;font-weight:800;letter-spacing:1.5px;margin:0 0 12px; }
+    select { width:100%; appearance:none; border:1px solid #405979; border-radius:13px; padding:15px 44px 15px 15px; color:var(--text); background:#203653; font-size:18px;font-weight:700; outline:none; }
+    .select-wrap { position:relative; }
+    .select-wrap:after { content:"⌄"; position:absolute;right:16px;top:8px;font-size:25px;color:var(--muted);pointer-events:none; }
+    .hint { color:var(--muted);font-size:12px;margin:9px 2px 0; }
+    .grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px; }
+    .level { display:flex;align-items:center;gap:9px;min-height:67px;padding:11px 9px;border:1px solid var(--line);border-radius:13px;background:#192b45;cursor:pointer;user-select:none; }
+    .level:has(input:checked) { border-color:#57c99a;background:#183b3b; }
+    .level input { width:21px;height:21px;accent-color:#57d5a1;flex:0 0 auto; }
+    .level-info { min-width:0; }
+    .level-name { display:block;font-weight:800;font-size:14px; }
+    .level-value { display:block;color:var(--muted);font-size:11px;margin-top:2px; }
+    .result { text-align:center;padding:22px 16px; }
+    .result .number { color:var(--accent);font-size:clamp(42px,12vw,60px);line-height:1.1;font-weight:900;letter-spacing:-1px;overflow-wrap:anywhere; }
+    .result .caption { color:var(--muted);font-size:12px;letter-spacing:1.4px;font-weight:800;margin-bottom:9px; }
+    .detail { display:flex;justify-content:space-between;gap:12px;padding:10px 2px;border-top:1px solid #2c4262;color:var(--muted);font-size:13px; }
+    .detail strong { color:var(--text);font-variant-numeric:tabular-nums; }
+    .actions { display:flex;gap:10px;margin-top:14px; }
+    button { border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#203653;color:var(--text);font-weight:700;font-size:14px;flex:1; }
+    button.primary { background:#58c99a;color:#08271f;border-color:#58c99a; }
+    .footer { text-align:center;color:#8295af;font-size:11px;padding:7px 0 4px; }
+    @media (max-width:360px) { .grid{grid-template-columns:repeat(2,minmax(0,1fr));} .card{padding:15px;} }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="logo">L</div>
+      <h1>LEVEL FINDER</h1>
+      <div class="sub">ITEM CALCULATOR</div>
+    </header>
+
+    <section class="card">
+      <p class="section-title">SELECT REQUIRED LEVEL</p>
+      <div class="select-wrap">
+        <select id="requiredLevel" aria-label="Required level"></select>
+      </div>
+      <p class="hint">Choose the level you want to reach.</p>
+    </section>
+
+    <section class="card">
+      <p class="section-title">TICK THE LEVELS / ITEMS YOU ALREADY HAVE</p>
+      <div class="grid" id="levels"></div>
+      <div class="actions">
+        <button id="clearBtn" type="button">Clear all ticks</button>
+        <button id="allBtn" type="button">Tick all</button>
+      </div>
+    </section>
+
+    <section class="card result">
+      <div class="caption">REMAINING LEVEL-1 ITEMS REQUIRED</div>
+      <div class="number" id="remaining">16</div>
+      <div class="hint" id="resultMessage">Items still needed to reach the selected level.</div>
+      <div style="margin-top:18px;text-align:left">
+        <div class="detail"><span>Required level value</span><strong id="targetValue">16</strong></div>
+        <div class="detail"><span>Items already available (total)</span><strong id="ownedValue">0</strong></div>
+        <div class="detail"><span>Calculation</span><strong id="calculation">16 − 0</strong></div>
+      </div>
+    </section>
+    <div class="footer">Your selections are saved on this device automatically.</div>
+  </main>
+
+<script>
+(() => {
+  const names = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th","11th","12th"];
+  const values = names.map((_, i) => 2 ** i);
+  const levelContainer = document.getElementById("levels");
+  const select = document.getElementById("requiredLevel");
+  const boxes = [];
+
+  names.forEach((name, i) => {
+    const option = document.createElement("option");
+    option.value = String(i);
+    option.textContent = `${name} Level`;
+    select.appendChild(option);
+
+    const label = document.createElement("label");
+    label.className = "level";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.setAttribute("aria-label", `${name} level owned`);
+    input.dataset.index = String(i);
+    const info = document.createElement("span");
+    info.className = "level-info";
+    const levelName = document.createElement("span");
+    levelName.className = "level-name";
+    levelName.textContent = name;
+    const value = document.createElement("span");
+    value.className = "level-value";
+    value.textContent = `${values[i].toLocaleString("en-IN")} item${values[i] === 1 ? "" : "s"}`;
+    info.append(levelName, value);
+    label.append(input, info);
+    levelContainer.appendChild(label);
+    boxes.push(input);
+    input.addEventListener("change", () => { save(); calculate(); });
+  });
+
+  function calculate() {
+    const targetIndex = Number(select.value);
+    const target = values[targetIndex];
+    const owned = boxes.reduce((sum, box, i) => sum + (box.checked ? values[i] : 0), 0);
+    const remaining = target - owned;
+    document.getElementById("targetValue").textContent = target.toLocaleString("en-IN");
+    document.getElementById("ownedValue").textContent = owned.toLocaleString("en-IN");
+    document.getElementById("calculation").textContent = `${target.toLocaleString("en-IN")} − ${owned.toLocaleString("en-IN")}`;
+    const result = document.getElementById("remaining");
+    const message = document.getElementById("resultMessage");
+    if (remaining > 0) {
+      result.textContent = remaining.toLocaleString("en-IN");
+      message.textContent = "Level-1 items still needed to reach the selected level.";
+    } else if (remaining === 0) {
+      result.textContent = "0";
+      message.textContent = "You have exactly enough items for this level.";
+    } else {
+      result.textContent = `+${Math.abs(remaining).toLocaleString("en-IN")}`;
+      message.textContent = "Extra item value available beyond the selected level.";
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem("levelFinderState", JSON.stringify({
+        required: select.value,
+        checked: boxes.map(box => box.checked)
+      }));
+    } catch (_) {}
+  }
+
+  function restore() {
+    try {
+      const state = JSON.parse(localStorage.getItem("levelFinderState") || "null");
+      if (state) {
+        if (state.required !== undefined) select.value = state.required;
+        if (Array.isArray(state.checked)) boxes.forEach((box, i) => box.checked = Boolean(state.checked[i]));
+      }
+    } catch (_) {}
+  }
+
+  select.addEventListener("change", () => { save(); calculate(); });
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    boxes.forEach(box => box.checked = false);
+    save(); calculate();
+  });
+  document.getElementById("allBtn").addEventListener("click", () => {
+    boxes.forEach(box => box.checked = true);
+    save(); calculate();
+  });
+
+  restore();
+  calculate();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+  }
+})();
+</script>
+</body>
+</html>
